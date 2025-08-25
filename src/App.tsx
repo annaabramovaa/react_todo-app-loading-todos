@@ -5,16 +5,24 @@ import { UserWarning } from './UserWarning';
 import { getTodos, USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
 
+type FilterType = 'all' | 'active' | 'completed';
+type ErrorType = 'LOAD_TODOS' | 'EMPTY_TITLE';
+
+const errorMessages: Record<ErrorType, string> = {
+  LOAD_TODOS: 'Unable to load todos',
+  EMPTY_TITLE: 'Title should not be empty',
+};
+
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [errorMessage, setErrorMessage] = useState<ErrorType | ''>('');
   const [newTodoTitle, setNewTodoTitle] = useState('');
 
   useEffect(() => {
     getTodos()
       .then(setTodos)
-      .catch(() => setErrorMessage('Unable to load todos'));
+      .catch(() => setErrorMessage('LOAD_TODOS'));
   }, []);
 
   useEffect(() => {
@@ -48,7 +56,7 @@ export const App: React.FC = () => {
     event.preventDefault();
 
     if (!newTodoTitle.trim()) {
-      setErrorMessage('Title should not be empty');
+      setErrorMessage('EMPTY_TITLE');
 
       return;
     }
@@ -191,7 +199,7 @@ export const App: React.FC = () => {
           onClick={() => setErrorMessage('')}
         />
         {/* show only one message at a time */}
-        {errorMessage}
+        {errorMessage && errorMessages[errorMessage]}
       </div>
     </div>
   );
